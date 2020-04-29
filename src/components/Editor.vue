@@ -17,7 +17,7 @@
         v-for="line in lineNumbersCount"
         :key="line"
       >
-        {{ line }}
+        {{ line + codeFirstLine - 1 }}
       </div>
     </div>
     <pre
@@ -66,6 +66,14 @@ export default {
       type: Boolean,
       default: false
     },
+    codeFirstLine: {
+      type: Number,
+      default: 1
+    },
+    codeLineCount: {
+      type: Number,
+      default: 0
+    },
     autoStyleLineNumbers: {
       type: Boolean,
       default: true
@@ -98,7 +106,18 @@ export default {
         if (!newVal) {
           this.codeData = "";
         } else {
-          this.codeData = newVal;
+          // Get code subset if necessary
+          if (this.codeLineCount) {
+            this.codeData = newVal
+              .split(/\r\n|\n/)
+              .slice(
+                this.codeFirstLine - 1,
+                this.codeFirstLine + this.codeLineCount - 1
+              )
+              .join("\n");
+          } else {
+            this.codeData = newVal;
+          }
         }
       }
     },
@@ -125,7 +144,7 @@ export default {
     },
     lineNumbersCount() {
       let totalLines = this.codeData.split(/\r\n|\n/).length;
-      // TODO: Find a better way of doing this - ignore last line break (os spesific etc.)
+      // TODO: Find a better way of doing this - ignore last line break (os specific etc.)
       if (this.codeData.endsWith("\n")) {
         totalLines--;
       }
